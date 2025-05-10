@@ -1,0 +1,147 @@
+#!/bin/bash
+
+display_header() {
+    printf "\033[32m"
+    printf "**************************************************\n"
+    printf "*                                                *\n"
+    printf "*  Setup LUCY environment                        *\n"
+    printf "*                                                *\n"
+    printf "*  Version: %-36s *\n" $VERSION
+    printf "*                                                *\n"
+    printf "**************************************************\n"
+    printf "\033[0m"
+}
+
+
+
+# Creating folder
+
+echo -ne "Creating lucy folder "
+if [[ -d "lucy" ]]; then
+    echo -e "\033[31mko.\033[0m"
+    echo -e "The folder lucy already exists."
+    exit 1
+fi
+mkdir lucy
+cd lucy
+echo -e "\033[32mok.\033[0m"
+
+# Cloning repositories
+
+echo -ne "Select a cloning method (https/ssh): "
+read method
+method=$(echo $method | tr '[:upper:]' '[:lower:]')
+
+case "$method" in
+    1|https|http)
+        ENDPOINT="https://github.com/Sentience-Robotics"
+        ;;
+    2|ssh)
+        ENDPOINT="git@github.com:Sentience-Robotics"
+        ;;
+    *)
+        echo -e "\033[31mThis method does not exists.\033[0m"
+        exit 1
+esac
+
+GIT=$(command -v git 2> /dev/null)
+if [[ $? -ne 0 ]]; then
+    echo -e "\033[31mgit not found.\033[0m"
+    exit 1
+fi
+
+IFS=";"
+REPOS="lucy_devtools;lucy_ros2;lucy_micro_ros_pico"
+
+umask 000
+for repo in $REPOS; do
+    echo -ne "Cloning $ENDPOINT/$repo.git "
+    $GIT clone "$ENDPOINT/$repo.git" 2> /tmp/lucy_init.log
+    if [[ $? -ne 0 ]]; then
+        echo -e "\033[31mko.\033[0m"
+        cat /tmp/lucy_init.log
+        exit 1
+    else
+        echo -e "\033[32mok.\033[0m"
+    fi
+done
+
+# Setting up the environment
+
+cat > .rosdistro.env << 'EOF'
+export ROS_DISTRO="humble"
+EOF
+
+cat > .envrc << 'EOF'
+export VERSION="0.1.0-dev"
+export LUCY="$(pwd)"
+export LUCY_UROS_PICO="$LUCY/lucy_micro_ros_pico"
+export LUCY_ROS2="$LUCY/lucy_ros2"
+export LUCY_DEVTOOLS="$LUCY/lucy_devtools"
+export LUCY_DOCKER="$LUCY_DEVTOOLS/lucy_docker"
+export LUCY_UTILS="$LUCY_DEVTOOLS/lucy_utils"
+export PATH="$PATH:$LUCY_UTILS"
+source $LUCY/.rosdistro.env
+EOF
+
+source "$(pwd)/.envrc"
+
+echo -ne "Setting up the environment "
+DIRENV=$(command -v direnv 2> /dev/null)
+if [[  $? -ne 0 ]]; then
+    echo -e "\033[31mko.\033[0m"
+    echo -e "direnv not found."
+    exit 1
+fi
+$DIRENV allow .
+if [[ $? -ne 0 ]]; then
+    echo -e "\033[31mko.\033[0m"
+    exit 1
+fi
+echo -e "\033[32mok.\033[0m"
+
+echo -ne "Setting up permissions "
+find . -type d -exec chmod 0777 {} +
+find . -type f -exec chmod 0666 {} +
+chmod 777 ./lucy_devtools/lucy_utils/*
+echo -e "\033[32mok.\033[0m"
+
+# Chosing default distribution
+
+ROS_DISTRIBUTIONS=("humble" "jazzy")
+
+echo -ne "Choose a ros distribution (${ROS_DISTRIBUTIONS[@]}): "
+read USER_ROS_DISTRIBUTION
+USER_ROS_DISTRIBUTION=$(echo $USER_ROS_DISTRIBUTION | tr '[:upper:]' '[:lower:]')
+if [[ -z "$USER_ROS_DISTRIBUTION" ]]; then
+    echo -e "\033[31mYou must specify a ros distribution\033[0m"
+    exit 1
+fi
+
+if [[ ! "${ROS_DISTRIBUTIONS[@]}" =~ $USER_ROS_DISTRIBUTION ]]; then
+    echo -e "\033[31mThis ROS distribution doesn't exist or is not suported"
+    echo -e "Supported distribution: (${ROS_DISTRIBUTIONS[@]})\033[0m"
+    exit 1
+fi
+
+lucy_devtools/lucy_utils/ChangeEnv $ROS_DISTRIBUTIONS
+
+# Pulling docker image
+
+echo -ne "Pulling docker image "
+DOCKER=$(command -v docker 2> /dev/null)
+if [[ $? -ne 0 ]]; then
+    echo -e "\033[31mDocker not found. Having an docker environment for development is strongly recommended.\033[0m"
+    exit 0
+fi
+$DOCKER pull ghcr.io/sentience-robotics/lucy_ros2_ws:jazzy > /dev/null 2> /tmp/lucy_init.log
+$DOCKER pull ghcr.io/sentience-robotics/lucy_ros2_ws:humble > /dev/null 2> /tmp/lucy_init.log
+if [[ $? -ne 0 ]]; then
+    echo -e "\033[31mko.\033[0m"
+    cat /tmp/lucy_init.log
+    exit 1
+else
+    echo -e "\033[32mok.\033[0m"
+fi
+
+exit 0
