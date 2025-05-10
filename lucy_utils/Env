@@ -1,0 +1,112 @@
+#!/bin/bash
+
+display_header() {
+    printf "\033[32m"
+    printf "**************************************************\n"
+    printf "*                                                *\n"
+    printf "*  Launch LUCY environment                       *\n"
+    printf "*                                                *\n"
+    printf "*  Version: %-36s *\n" $VERSION
+    printf "*                                                *\n"
+    printf "**************************************************\n"
+    printf "\033[0m"
+}
+
+display_help() {
+    echo "Usage: $0 [options]... [command]"
+    echo
+    echo "Options:"
+    echo "  -h, --help      Show this help message"
+    echo
+    echo "Commands:"
+    echo "  launch          Launch the LUCY environment in attached mode"
+    echo "  up              Start the LUCY environment in detached mode"
+    echo "  down            Stop the LUCY environment"
+    echo "  attach          Attach to the LUCY environment"
+}
+
+up() {
+    $DOCKER_COMPOSE up -d
+}
+
+down() {
+    $DOCKER_COMPOSE down
+}
+
+attach() {
+    $DOCKER_COMPOSE exec lucy_ros2_ws bash
+}
+
+
+
+
+
+DOCKER=`command -v docker`
+if [[ $? -ne 0 ]]; then
+    echo -e "\033[31mDocker is not installed. Please install Docker to use this script.\033[0m"
+    exit 1
+fi
+
+DOCKER_COMPOSE=`command -v docker-compose`
+if [[ $? -ne 0 ]]; then
+    echo -e "\033[31mDocker Compose is not installed. Please install Docker Compose to use this script.\033[0m"
+    exit 1
+fi
+
+OPTIONS=":h"
+LONGOPTS="help"
+OPTS=$(getopt --name "$0" -o $OPTIONS -l $LONGOPTS -- "$@")
+if [ $? -ne 0 ]; then
+    display_help
+    exit 1
+fi
+
+display_header
+
+eval set -- "$OPTS"
+
+while true; do
+    case "$1" in
+        -h|--help)
+            display_help
+            shift 1
+            exit 0
+            ;;
+        --)
+            shift
+            break
+            ;;
+        *)
+            echo "Invalid options: $1"
+            display_help
+            exit 1
+            ;;
+    esac
+done
+
+for arg in "$@"; do
+    case "$arg" in
+        launch)
+            up
+            attach
+            break
+            ;;
+        up)
+            up
+            break
+            ;;
+        down)
+            down
+            break
+            ;;
+        attach)
+            attach
+            break
+            ;;
+        *)
+            echo "Invalid command: $arg"
+            display_help
+            exit 1
+            ;;
+    esac
+done
