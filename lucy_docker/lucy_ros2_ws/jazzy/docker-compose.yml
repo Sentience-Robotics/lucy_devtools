@@ -1,0 +1,10 @@
+services:
+  lucy_ros2_ws:
+    image: ghcr.io/sentience-robotics/lucy_ros2_ws:jazzy
+    restart: unless-stopped
+    command: tail -f /dev/null
+    volumes:
+      - "./lucy_devtools:/home/rosdev/lucy_ros2_ws/lucy_devtools"
+      - "./lucy_ros2:/home/rosdev/lucy_ros2_ws/src/lucy_ros2"
+      - "./lucy_uros:/home/rosdev/lucy_ros2_ws/src/lucy_uros"
+    network_mode: host
