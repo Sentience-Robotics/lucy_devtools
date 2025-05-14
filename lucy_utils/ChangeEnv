@@ -1,0 +1,28 @@
+#!/bin/bash
+
+if [[ -z "$1" ]]; then
+    echo -e "You must specify a ros distribution"
+fi
+
+DISTRIBUTIONS=("humble" "jazzy")
+
+DIRENV=$(command -v direnv 2> /dev/null)
+LN=$(command -v ln 2> /dev/null)
+
+for distribution in "${DISTRIBUTIONS[@]}"; do
+    if [[ "$distribution" == "$1" ]]; then
+        echo "# This file is a generated file, use ChangeEnv script to change ros distro" > $LUCY/.rosdistro.env
+        echo "export ROS_DISTRO=\"$distribution\"" >> $LUCY/.rosdistro.env
+        if [[ -z "$DIRENV" ]]; then
+            echo -e "\033[33mSource .envrc file\033[0m"
+        else
+            $DIRENV allow .
+        fi
+
+        ln -fs $(realpath --relative-to=$LUCY $LUCY_DOCKER/lucy_ros2_ws/$distribution/docker-compose.yml)
+        exit 0
+    fi
+done
+
+echo -e "Distribution not found or not supported yet"
+exit 1
