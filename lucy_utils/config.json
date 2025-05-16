@@ -1,0 +1,17 @@
+{
+  "repos": [
+    {
+      "name": "lucy_devtools",
+      "path": "lucy_devtools"
+    },
+    {
+      "name": "lucy_ros2",
+      "path": "src/lucy_ros2"
+    },
+    {
+      "name": "lucy_micro_ros_pico",
+      "path": "src/lucy_micro_ros_pico"
+    }
+  ]
+}
+

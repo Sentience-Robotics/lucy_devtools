@@ -1,13 +1,15 @@
 #!/bin/bash
 
+Header
+
 if [[ -z "$1" ]]; then
-    echo -e "You must specify a ros distribution"
+    echo -e "\033[31mYou must specify a ros distribution.\033[0m"
+    exit 1
 fi
 
 DISTRIBUTIONS=("humble" "jazzy")
 
 DIRENV=$(command -v direnv 2> /dev/null)
-LN=$(command -v ln 2> /dev/null)
 
 for distribution in "${DISTRIBUTIONS[@]}"; do
     if [[ "$distribution" == "$1" ]]; then
@@ -18,8 +20,6 @@ for distribution in "${DISTRIBUTIONS[@]}"; do
         else
             $DIRENV allow .
         fi
-
-        ln -fs $(realpath --relative-to=$LUCY $LUCY_DOCKER/lucy_ros2_ws/$distribution/docker-compose.yml)
         exit 0
     fi
 done

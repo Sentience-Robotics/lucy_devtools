@@ -1,19 +1,5 @@
 #!/bin/bash
 
-display_header() {
-    printf "\033[32m"
-    printf "**************************************************\n"
-    printf "*                                                *\n"
-    printf "*  Setup LUCY environment                        *\n"
-    printf "*                                                *\n"
-    printf "*  Version: %-36s *\n" $VERSION
-    printf "*                                                *\n"
-    printf "**************************************************\n"
-    printf "\033[0m"
-}
-
-
-
 # Creating folder
 
 echo -ne "Creating lucy folder "
@@ -29,24 +15,7 @@ echo -e "\033[32mok.\033[0m"
 # Cloning repositories
 
 # TODO change with curl on official repo
-cat > config.json << 'EOF'
-{
-    "repos": [
-        {
-            "name": "lucy_devtools",
-            "path": "lucy_devtools"
-        },
-        {
-            "name": "lucy_ros2",
-            "path": "src/lucy_ros2"
-        },
-        {
-            "name": "lucy_micro_ros_pico",
-            "path": "src/lucy_micro_ros_pico"
-        }
-    ]
-}
-EOF
+config_json="$(curl -fsSL "https://raw.githubusercontent.com/Sentience-Robotics/lucy_devtools/refs/heads/mbo/utils/lucy_utils/config.json")"
 
 echo -ne "Select a cloning method (https/ssh): "
 read method
@@ -70,7 +39,7 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 
-mapfile -t REPOS < <(jq -r --arg git "$GIT" --arg endpoint "$ENDPOINT" '.repos[] | "\(.name) \(.path) \($git) clone \($endpoint)/\(.name).git \(.path)"' < ./config.json)
+mapfile -t REPOS < <(echo $config_json | jq -r --arg git "$GIT" --arg endpoint "$ENDPOINT" '.repos[] | "\(.name) \(.path) \($git) clone \($endpoint)/\(.name).git \(.path)"')
 
 for repo in "${REPOS[@]}"; do
     repo_name=$(echo $repo | cut -d ' ' -f 1)
