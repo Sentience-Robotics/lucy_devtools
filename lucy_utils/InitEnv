@@ -1,19 +1,5 @@
 #!/bin/bash
 
-display_header() {
-    printf "\033[32m"
-    printf "**************************************************\n"
-    printf "*                                                *\n"
-    printf "*  Setup LUCY environment                        *\n"
-    printf "*                                                *\n"
-    printf "*  Version: %-36s *\n" $VERSION
-    printf "*                                                *\n"
-    printf "**************************************************\n"
-    printf "\033[0m"
-}
-
-
-
 # Creating folder
 
 echo -ne "Creating lucy folder "
@@ -22,27 +8,17 @@ if [[ -d "lucy" ]]; then
     echo -e "The folder lucy already exists."
     exit 1
 fi
-mkdir lucy
+mkdir -p lucy/src
 cd lucy
 echo -e "\033[32mok.\033[0m"
 
 # Cloning repositories
 
-echo -ne "Select a cloning method (https/ssh): "
+echo -ne "Select a cloning method for lucy repo (https/ssh): "
 read method
 method=$(echo $method | tr '[:upper:]' '[:lower:]')
 
-case "$method" in
-    1|https|http)
-        ENDPOINT="https://github.com/Sentience-Robotics"
-        ;;
-    2|ssh)
-        ENDPOINT="git@github.com:Sentience-Robotics"
-        ;;
-    *)
-        echo -e "\033[31mThis method does not exists.\033[0m"
-        exit 1
-esac
+# Cloning lucy repo
 
 GIT=$(command -v git 2> /dev/null)
 if [[ $? -ne 0 ]]; then
@@ -50,21 +26,56 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 
-IFS=";"
-REPOS="lucy_devtools;lucy_ros2;lucy_micro_ros_pico"
+CURL=$(command -v curl 2> /dev/null)
+if [[ $? -ne 0 ]]; then
+    echo -e "\033[31mcurl not found.\033[0m"
+    exit 1
+fi
 
-umask 000
-for repo in $REPOS; do
-    echo -ne "Cloning $ENDPOINT/$repo.git "
-    $GIT clone "$ENDPOINT/$repo.git" 2> /tmp/lucy_init.log
+VCS=$(command -v vcs 2> /dev/null)
+if [[ $? -ne 0 ]]; then
+    echo -e "\033[31mvcs not found.\033[0m"
+    exit 1
+fi
+
+clone_lucy_repo() {
+    echo -ne "Cloning $1Sentience-Robotics/$2.git. "
+    $GIT clone "$1Sentience-Robotics/$2.git" > /dev/null 2> /tmp/lucy_init.log
     if [[ $? -ne 0 ]]; then
-        echo -e "\033[31mko.\033[0m"
+        echo -ne "\033[31mko\033[0m"
         cat /tmp/lucy_init.log
         exit 1
-    else
-        echo -e "\033[32mok.\033[0m"
     fi
-done
+    echo -e "\033[32mok\033[0m"
+}
+
+case "$method" in
+    1|https|http)
+        clone_lucy_repo "https://github.com/" "lucy_devtools"
+        echo -ne "Cloning lucy ros packages "
+        $CURL -fsSL "https://raw.githubusercontent.com/Sentience-Robotics/lucy_devtools/refs/heads/master/lucy_utils/lucy.https.repos" | $VCS import src > /dev/null 2> /tmp/lucy_init.log
+        if [[ $? -ne 0 ]]; then
+            echo -ne "\033[31mko\033[0m"
+            cat /tmp/lucy_init.log
+            exit 1
+        fi
+        echo -e "\033[32mok\033[0m"
+        ;;
+    2|ssh)
+        clone_lucy_repo "git@github.com:" "lucy_devtools"
+        echo -ne "Cloning lucy ros packages "
+        $CURL -fsSL "https://raw.githubusercontent.com/Sentience-Robotics/lucy_devtools/refs/heads/master/lucy_utils/lucy.ssh.repos" | $VCS import src > /dev/null 2> /tmp/lucy_init.log
+        if [[ $? -ne 0 ]]; then
+            echo -ne "\033[31mko\033[0m"
+            cat /tmp/lucy_init.log
+            exit 1
+        fi
+        echo -e "\033[32mok\033[0m"
+        ;;
+    *)
+        echo -e "\033[31mThis method does not exists.\033[0m"
+        exit 1
+esac
 
 # Setting up the environment
 
@@ -73,10 +84,10 @@ export ROS_DISTRO="humble"
 EOF
 
 cat > .envrc << 'EOF'
-export VERSION="0.1.0-dev"
+export VERSION="0.1.0"
 export LUCY="$(pwd)"
-export LUCY_UROS_PICO="$LUCY/lucy_micro_ros_pico"
-export LUCY_ROS2="$LUCY/lucy_ros2"
+export LUCY_UROS_PICO="$LUCY/src/lucy_micro_ros_pico"
+export LUCY_ROS2="$LUCY/src/lucy_ros2"
 export LUCY_DEVTOOLS="$LUCY/lucy_devtools"
 export LUCY_DOCKER="$LUCY_DEVTOOLS/lucy_docker"
 export LUCY_UTILS="$LUCY_DEVTOOLS/lucy_utils"

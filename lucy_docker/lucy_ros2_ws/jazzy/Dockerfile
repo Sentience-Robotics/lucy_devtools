@@ -19,10 +19,10 @@ ENV LC_ALL=C.UTF-8
 RUN apt update -q && \
     apt upgrade -q -y && \
     apt install -y --no-install-recommends \
-        software-properties-common \
+        software-properties-common apt-utils \
         python3-pip \
         make ninja-build clang gcc-arm-none-eabi \
-        git vim screen curl lsb-release gnupg sudo clangd \
+        direnv git vim screen curl lsb-release gnupg sudo clangd \
         libboost-all-dev \
         xorg dbus-x11 tigervnc-common tigervnc-xorg-extension tigervnc-standalone-server tigervnc-tools && \
     add-apt-repository universe && \
@@ -39,10 +39,14 @@ RUN apt update -q && \
 # Setup user
 RUN useradd -m -s /bin/bash -G sudo $USERNAME && \
     echo "$USERNAME ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers && \
-    mkdir -p /home/$USERNAME && \
+    mkdir -p /home/$USERNAME/lucy_ros2_ws && \
     chown -R $USERNAME:$USERNAME /home/$USERNAME
 USER $USERNAME
+WORKDIR /home/$USERNAME/lucy_ros2_ws
 RUN bash -c "echo -e '$USERNAME\n$USERNAME\n' | vncpasswd"
 
 # Copy configuration files
-RUN echo 'source /opt/ros/'$ROS_DISTRO'/setup.bash' >> /home/$USERNAME/.bashrc
+RUN echo 'source /opt/ros/'$ROS_DISTRO'/setup.bash' >> /home/$USERNAME/.bashrc && \
+    echo 'eval "$(direnv hook bash)"' >> /home/$USERNAME/.bashrc && \
+    echo 'umask 0000' >> /home/$USERNAME/.bashrc
+
