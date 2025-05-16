@@ -1,57 +1,56 @@
 #!/bin/bash
 
-display_header() {
-    printf "\033[32m"
-    printf "**************************************************\n"
-    printf "*                                                *\n"
-    printf "*  Launch LUCY environment                       *\n"
-    printf "*                                                *\n"
-    printf "*  Version: %-36s *\n" $VERSION
-    printf "*                                                *\n"
-    printf "**************************************************\n"
-    printf "\033[0m"
-}
+Header
 
 display_help() {
-    echo "Usage: $0 [options]... [command]"
+    echo "Usage: Env [OPTIONS]... [COMMAND]"
     echo
     echo "Options:"
     echo "  -h, --help      Show this help message"
     echo
     echo "Commands:"
     echo "  launch          Launch the LUCY environment in attached mode"
-    echo "  up              Start the LUCY environment in detached mode"
-    echo "  down            Stop the LUCY environment"
-    echo "  attach          Attach to the LUCY environment"
+    echo "  up              Create and start the LUCY docker environment in detached mode"
+    echo "  down            Stop and wipe the LUCY docker environment"
+    echo "  start           Start the LUCY docker environment"
+    echo "  stop            Stop the LUCY docker environment"
+    echo "  attach          Attach to the LUCY docker environment"
 }
 
-up() {
-    $DOCKER_COMPOSE up -d
+dc_up() {
+    $DOCKER_COMPOSE -f $LUCY_DOCKER/lucy_ros2_ws/$ROS_DISTRO/docker-compose.yml up -d
 }
 
-down() {
+dc_down() {
     $DOCKER_COMPOSE down
 }
 
-attach() {
+dc_start() {
+    $DOCKER_COMPOSE start
+}
+
+dc_stop() {
+    $DOCKER_COMPOSE stop
+}
+
+dc_attach() {
     $DOCKER_COMPOSE exec lucy_ros2_ws bash
 }
 
 
 
-
-
-DOCKER=`command -v docker`
+DOCKER=$(command -v docker 2> /dev/null)
 if [[ $? -ne 0 ]]; then
     echo -e "\033[31mDocker is not installed. Please install Docker to use this script.\033[0m"
     exit 1
 fi
 
-DOCKER_COMPOSE=`command -v docker-compose`
+DOCKER_COMPOSE=$(command -v docker-compose 2> /dev/null)
 if [[ $? -ne 0 ]]; then
     echo -e "\033[31mDocker Compose is not installed. Please install Docker Compose to use this script.\033[0m"
     exit 1
 fi
+DOCKER_COMPOSE="$DOCKER_COMPOSE -f $LUCY_DOCKER/lucy_ros2_ws/$ROS_DISTRO/docker-compose.yml"
 
 OPTIONS=":h"
 LONGOPTS="help"
@@ -61,7 +60,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-display_header
+
 
 eval set -- "$OPTS"
 
@@ -87,20 +86,28 @@ done
 for arg in "$@"; do
     case "$arg" in
         launch)
-            up
-            attach
+            dc_up
+            dc_attach
             break
             ;;
         up)
-            up
+            dc_up
             break
             ;;
         down)
-            down
+            dc_down
+            break
+            ;;
+        start)
+            dc_start
+            break
+            ;;
+        down)
+            dc_down
             break
             ;;
         attach)
-            attach
+            dc_attach
             break
             ;;
         *)
