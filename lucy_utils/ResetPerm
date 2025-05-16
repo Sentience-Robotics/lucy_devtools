@@ -1,0 +1,8 @@
+#!/bin/bash
+
+Header
+
+cd $LUCY
+find . -type d -exec chmod 0777 {} +
+find . -type f -exec chmod 0666 {} +
+chmod 777 ./lucy_devtools/lucy_utils/*
