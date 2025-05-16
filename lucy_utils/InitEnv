@@ -1,19 +1,5 @@
 #!/bin/bash
 
-display_header() {
-    printf "\033[32m"
-    printf "**************************************************\n"
-    printf "*                                                *\n"
-    printf "*  Setup LUCY environment                        *\n"
-    printf "*                                                *\n"
-    printf "*  Version: %-36s *\n" $VERSION
-    printf "*                                                *\n"
-    printf "**************************************************\n"
-    printf "\033[0m"
-}
-
-
-
 # Creating folder
 
 echo -ne "Creating lucy folder "
