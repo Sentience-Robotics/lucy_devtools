@@ -1,11 +1,12 @@
 services:
   lucy_ros2_ws:
+    container_name: "lucy_ros2_ws_jazzy"
     image: ghcr.io/sentience-robotics/lucy_ros2_ws:jazzy
     restart: unless-stopped
     command: tail -f /dev/null
     volumes:
-      - "${LUCY}/.envrc:/home/rosdev/lucy_ros2_ws/"
-      - "${LUCY}/.rosdistro.env:/home/rosdev/lucy_ros2_ws/"
+      - "${LUCY}/.envrc:/home/rosdev/lucy_ros2_ws/.envrc"
+      - "${LUCY}/.rosdistro.env:/home/rosdev/lucy_ros2_ws/.rosdistro.env"
       - "${LUCY}/lucy_devtools:/home/rosdev/lucy_ros2_ws/lucy_devtools"
       - "${LUCY}/lucy_ros2:/home/rosdev/lucy_ros2_ws/src/lucy_ros2"
       - "${LUCY}/lucy_micro_ros_pico:/home/rosdev/lucy_ros2_ws/src/lucy_micro_ros_pico"

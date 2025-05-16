@@ -1,6 +1,7 @@
 services:
   lucy_ros2_ws:
-    image: ghcr.io/sentience-robotics/lucy_ros2_ws:jazzy
+    container_name: "lucy_ros2_ws_humble"
+    image: ghcr.io/sentience-robotics/lucy_ros2_ws:humble
     restart: unless-stopped
     command: tail -f /dev/null
     volumes:

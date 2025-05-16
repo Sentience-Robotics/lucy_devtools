@@ -38,10 +38,14 @@ RUN apt update -q && \
 # Setup user
 RUN useradd -m -s /bin/bash -G sudo $USERNAME && \
     echo "$USERNAME ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers && \
-    mkdir -p /home/$USERNAME && \
+    mkdir -p /home/$USERNAME/lucy_ros2_ws && \
     chown -R $USERNAME:$USERNAME /home/$USERNAME
 USER $USERNAME
+WORKDIR /home/$USERNAME/lucy_ros2_ws
 RUN bash -c "echo -e '$USERNAME\n$USERNAME\n' | vncpasswd"
 
 # Copy configuration files
-RUN echo 'source /opt/ros/'$ROS_DISTRO'/setup.bash' >> /home/$USERNAME/.bashrc
+RUN echo 'source /opt/ros/'$ROS_DISTRO'/setup.bash' >> /home/$USERNAME/.bashrc && \
+    echo 'eval "$(direnv hook bash)"' >> /home/$USERNAME/.bashrc && \
+    echo 'umask 0000' >> /home/$USERNAME/.bashrc
+
