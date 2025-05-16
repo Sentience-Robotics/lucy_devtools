@@ -18,10 +18,10 @@ ENV LC_ALL=C.UTF-8
 RUN apt update -q && \
     apt upgrade -q -y && \
     apt install -y --no-install-recommends \
-        software-properties-common \
+        software-properties-common apt-utils \
         python3-pip \
         make ninja-build clang gcc-arm-none-eabi \
-        git vim screen curl lsb-release gnupg sudo clangd \
+        direnv git vim screen curl lsb-release gnupg sudo clangd \
         libboost-all-dev \
         xorg dbus-x11 tigervnc-common tigervnc-xorg-extension tigervnc-standalone-server tigervnc-tools && \
     add-apt-repository universe && \

@@ -4,7 +4,9 @@ services:
     restart: unless-stopped
     command: tail -f /dev/null
     volumes:
-      - "./lucy_devtools:/home/rosdev/lucy_ros2_ws/lucy_devtools"
-      - "./lucy_ros2:/home/rosdev/lucy_ros2_ws/src/lucy_ros2"
-      - "./lucy_uros:/home/rosdev/lucy_ros2_ws/src/lucy_uros"
+      - "${LUCY}/.envrc:/home/rosdev/lucy_ros2_ws/.envrc"
+      - "${LUCY}/.rosdistro.env:/home/rosdev/lucy_ros2_ws/.rosdistro.env"
+      - "${LUCY}/lucy_devtools:/home/rosdev/lucy_ros2_ws/lucy_devtools"
+      - "${LUCY}/lucy_ros2:/home/rosdev/lucy_ros2_ws/src/lucy_ros2"
+      - "${LUCY}/lucy_micro_ros_pico:/home/rosdev/lucy_ros2_ws/src/lucy_micro_ros_pico"
     network_mode: host
