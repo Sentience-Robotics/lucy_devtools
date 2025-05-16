@@ -28,6 +28,26 @@ echo -e "\033[32mok.\033[0m"
 
 # Cloning repositories
 
+# TODO change with curl on official repo
+cat > config.json << 'EOF'
+{
+    "repos": [
+        {
+            "name": "lucy_devtools",
+            "path": "lucy_devtools"
+        },
+        {
+            "name": "lucy_ros2",
+            "path": "src/lucy_ros2"
+        },
+        {
+            "name": "lucy_micro_ros_pico",
+            "path": "src/lucy_micro_ros_pico"
+        }
+    ]
+}
+EOF
+
 echo -ne "Select a cloning method (https/ssh): "
 read method
 method=$(echo $method | tr '[:upper:]' '[:lower:]')
@@ -50,13 +70,14 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 
-IFS=";"
-REPOS="lucy_devtools;lucy_ros2;lucy_micro_ros_pico"
+mapfile -t REPOS < <(jq -r --arg git "$GIT" --arg endpoint "$ENDPOINT" '.repos[] | "\(.name) \(.path) \($git) clone \($endpoint)/\(.name).git \(.path)"' < ./config.json)
 
-umask 000
-for repo in $REPOS; do
-    echo -ne "Cloning $ENDPOINT/$repo.git "
-    $GIT clone "$ENDPOINT/$repo.git" 2> /tmp/lucy_init.log
+for repo in "${REPOS[@]}"; do
+    repo_name=$(echo $repo | cut -d ' ' -f 1)
+    repo_path=$(echo $repo | cut -d ' ' -f 2)
+    repo_command=$(echo $repo | cut -d ' ' -f 3-)
+    echo -ne "Cloning $repo_name into $repo_path "
+    $repo_command 2> /tmp/lucy_init.log
     if [[ $? -ne 0 ]]; then
         echo -e "\033[31mko.\033[0m"
         cat /tmp/lucy_init.log
