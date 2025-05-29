@@ -1,0 +1,12 @@
+#!/bin/bash
+
+printf "\033[32m"
+printf "**************************************************\n"
+printf "*                                                *\n"
+printf "*  LUCY - %-38s *\n" "$(date "+%Y-%m-%d %H:%M")"
+printf "*                                                *\n"
+printf "*  Version: %-36s *\n" $VERSION
+printf "*  ROS Distribution: %-27s *\n" $ROS_DISTRO
+printf "*                                                *\n"
+printf "**************************************************\n"
+printf "\033[0m"

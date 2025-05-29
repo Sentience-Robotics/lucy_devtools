@@ -1,34 +1,53 @@
-# REPOSITORY TEMPLATE
-<!-- TODO list -->
+# LUCY Devtools
 
-> When creating a repository with this template, here are the steps you need to follow :
-
-- Update the title, the overview & the feature list
-  - You can add as many section as needed
-- Update the [Acknowledgments](#-acknowledgments) section as needed
-  - Be sure to keep InMoov & the community as acknowledgments
-- Update the [CONTRIBUTING.md](CONTRIBUTING.md) file
-  - Change all `<project>` with the correct project name, it will be used, for example, for github urls
-  - `sed -i 's/<project>/actual_project_name/g' ./CONTRIBUTING.MD`
-- Delete this [REPOSITORY TEMPLATE](#repository-template) section
-
-# Amazing project
-<!-- Include a short decription of about one line of the project -->
-...
+Docker image and utils for ROS development
 
 ---
 
 ## 📌 Overview
-<!-- Provide a more in-depth description of what the project's goals are, add some context, etc -->
 
-...
+LUCY Devtools is a set of tools and scripts designed to facilitate the development of ROS-based applications.
+
+It provides a Docker environment tailored for ROS development, along with a collection of scripts to manage the development environment efficiently.
 
 ---
 
 ## 🚀 Features
-<!-- Add a list of the key features of the project -->
 
-- ...
+### Docker
+
+Two dockerfile used for ROS development environment
+
+Dockerfile are made for both Humble and Jazzy ROS distributions.
+
+### Scripts
+
+- ChangeEnv: Use to switch easily between ROS distributions
+- Env: Use to manage environment (docker)
+- InitEnv: Use to initialize the environment (must be curled from the repository)
+- Make: Use to build (with colcon)
+- ResetPerm: Use to setup permissions for the repository
+
+---
+
+## 📥 Setup
+
+### Full setup (recommended)
+
+```bash
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/Sentience-Robotics/lucy_devtools/refs/heads/master/lucy_utils/InitEnv)"
+```
+
+### Basic setup
+
+> [!WARNING]
+> This setup is for advanced users who are familiar with the LUCY tools and ROS environment.
+
+Clone the repository
+
+```bash
+git clone https://github.com/Sentience-Robotics/lucy_micro_ros_pico.git lucy_devtools
+```
 
 ---
 

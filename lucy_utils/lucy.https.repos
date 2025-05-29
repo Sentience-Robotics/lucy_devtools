@@ -1,0 +1,10 @@
+repositories:
+  lucy_ros2:
+    type: git
+    url: https://github.com/Sentience-Robotics/lucy_ros2.git
+    version: master
+
+  lucy_micro_ros_pico:
+    type: git
+    url: https://github.com/Sentience-Robotics/lucy_micro_ros_pico.git
+    version: master
