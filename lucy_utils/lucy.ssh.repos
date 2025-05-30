@@ -8,3 +8,8 @@ repositories:
     type: git
     url: git@github.com:Sentience-Robotics/lucy_micro_ros_pico.git
     version: master
+
+inmoov_ros_sim:
+    type: git
+    url: git@github.com:Sentience-Robotics/inmoov_ros_sim.git
+    version: master
