@@ -145,8 +145,7 @@ if [[ $? -ne 0 ]]; then
     echo -e "\033[31mDocker not found. Having an docker environment for development is strongly recommended.\033[0m"
     exit 0
 fi
-$DOCKER pull ghcr.io/sentience-robotics/lucy_ros2_ws:jazzy > /dev/null 2> /tmp/lucy_init.log
-$DOCKER pull ghcr.io/sentience-robotics/lucy_ros2_ws:humble > /dev/null 2> /tmp/lucy_init.log
+$DOCKER pull ghcr.io/sentience-robotics/lucy_ros2_ws:$USER_ROS_DISTRIBUTION > /dev/null 2> /tmp/lucy_init.log
 if [[ $? -ne 0 ]]; then
     echo -e "\033[31mko.\033[0m"
     cat /tmp/lucy_init.log
