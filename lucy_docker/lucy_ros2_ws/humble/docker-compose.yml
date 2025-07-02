@@ -1,10 +1,10 @@
 services:
   lucy_ros2_ws:
+    build: .
     container_name: "lucy_ros2_ws_humble"
-    image: ghcr.io/sentience-robotics/lucy_ros2_ws:humble
+    image: lucy_ros2_ws:humble
     restart: unless-stopped
     command: tail -f /dev/null
     volumes:
       - "${LUCY}:/home/rosdev/lucy_ros2_ws"
-      - "/tmp/.X11-unix:/tmp/.X11-unix:rw"
     network_mode: host

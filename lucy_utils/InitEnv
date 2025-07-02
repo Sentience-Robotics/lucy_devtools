@@ -136,22 +136,3 @@ if [[ ! "${ROS_DISTRIBUTIONS[@]}" =~ $USER_ROS_DISTRIBUTION ]]; then
 fi
 
 lucy_devtools/lucy_utils/ChangeEnv $ROS_DISTRIBUTIONS
-
-# Pulling docker image
-
-echo -ne "Pulling docker image "
-DOCKER=$(command -v docker 2> /dev/null)
-if [[ $? -ne 0 ]]; then
-    echo -e "\033[31mDocker not found. Having an docker environment for development is strongly recommended.\033[0m"
-    exit 0
-fi
-$DOCKER pull ghcr.io/sentience-robotics/lucy_ros2_ws:$USER_ROS_DISTRIBUTION > /dev/null 2> /tmp/lucy_init.log
-if [[ $? -ne 0 ]]; then
-    echo -e "\033[31mko.\033[0m"
-    cat /tmp/lucy_init.log
-    exit 1
-else
-    echo -e "\033[32mok.\033[0m"
-fi
-
-exit 0

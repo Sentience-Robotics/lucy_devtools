@@ -18,7 +18,7 @@ display_help() {
 }
 
 dc_up() {
-    $DOCKER_COMPOSE -f $LUCY_DOCKER/lucy_ros2_ws/$ROS_DISTRO/docker-compose.yml up -d
+    $DOCKER_COMPOSE up --build -d
 }
 
 dc_down() {
@@ -45,10 +45,14 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 
-DOCKER_COMPOSE=$(command -v docker-compose 2> /dev/null)
+DOCKER_COMPOSE="$DOCKER compose"
+$DOCKER_COMPOSE version &> /dev/null
 if [[ $? -ne 0 ]]; then
-    echo -e "\033[31mDocker Compose is not installed. Please install Docker Compose to use this script.\033[0m"
-    exit 1
+    DOCKER_COMPOSE=$(command -v docker-compose 2> /dev/null)
+    if [[ $? -ne 0 ]]; then
+        echo -e "\033[31mDocker Compose is not installed. Please install Docker Compose to use this script.\033[0m"
+        exit 1
+    fi
 fi
 DOCKER_COMPOSE="$DOCKER_COMPOSE -f $LUCY_DOCKER/lucy_ros2_ws/$ROS_DISTRO/docker-compose.yml"
 

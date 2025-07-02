@@ -1,14 +1,16 @@
 FROM ubuntu:24.04
 
-LABEL org.opencontainers.image.title="lucy_ros2_base"
-LABEL org.opencontainers.image.description="Lucy ROS2 base"
+# Setup label
+LABEL org.opencontainers.image.title="lucy_ros2_ws"
+LABEL org.opencontainers.image.description="Lucy ROS2 workspace"
 LABEL org.opencontainers.image.vendor="Sentience Robotics"
 LABEL org.opencontainers.image.authors="Sentience Robotics"
 
 #Setup ARG
+ARG UID=1000
+ARG GID=1000
 ARG DEBIAN_FRONTEND=noninteractive
 ARG ROS_DISTRO=jazzy
-
 ARG USERNAME=rosdev
 
 # Set the locale
@@ -33,11 +35,10 @@ RUN apt update -q && \
         ros-$ROS_DISTRO-desktop \
         ros-$ROS_DISTRO-ros-gz \
         ros-dev-tools && \
-    apt clean -y && \
-    rm -rf /var/lib/apt/lists/* /var/cache/apt/*
+    apt clean -y
 
 # Setup user
-RUN useradd -m -s /bin/bash -G sudo $USERNAME && \
+RUN useradd -m -u $UID -g $GID -s /bin/bash -G sudo $USERNAME && \
     echo "$USERNAME ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers && \
     mkdir -p /home/$USERNAME/lucy_ros2_ws && \
     chown -R $USERNAME:$USERNAME /home/$USERNAME
