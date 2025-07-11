@@ -9,12 +9,15 @@ fi
 
 DISTRIBUTIONS=("humble" "jazzy")
 
-DIRENV=$(command -v direnv 2> /dev/null)
+if ! DIRENV=$(command -v direnv 2> /dev/null); then
+    echo -e "direnv not found."
+    exit 1
+fi
 
 for distribution in "${DISTRIBUTIONS[@]}"; do
     if [[ "$distribution" == "$1" ]]; then
-        echo "# This file is a generated file, use ChangeEnv script to change ros distro" > $LUCY/.rosdistro.env
-        echo "export ROS_DISTRO=\"$distribution\"" >> $LUCY/.rosdistro.env
+        echo "# This file is a generated file, use ChangeEnv script to change ros distro" > "$LUCY/.rosdistro.env"
+        echo "export ROS_DISTRO=\"$distribution\"" >> "$LUCY/.rosdistro.env"
         if [[ -z "$DIRENV" ]]; then
             echo -e "\033[33mSource .envrc file\033[0m"
         else

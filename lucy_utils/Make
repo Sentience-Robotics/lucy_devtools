@@ -15,7 +15,7 @@ display_help() {
 }
 
 clean() {
-    cd $LUCY
+    cd "$LUCY" || exit 1
     stopwatch=$DELAY_BEFORE_PURGE
     while [[ $stopwatch -gt 0 ]]; do
         echo -e "Cleaning the build directory in $stopwatch seconds..."
@@ -28,18 +28,16 @@ clean() {
 }
 
 build_colcon() {
-    cd $LUCY
-    COLCON=$(command -v colcon 2> /dev/null)
-    if [[ -z "$COLCON" ]]; then
+    cd "$LUCY" || exit 1
+    if ! COLCON=$(command -v colcon 2> /dev/null); then
         echo -e "\033[31mcolcon not found. Please install colcon.\033[0m"
         exit 1
     fi
-    $COLCON build --parallel-workers $JOBS
+    $COLCON build --parallel-workers "$JOBS"
 }
 
 generate_ctags() {
-    CTAGS=$(command -v ctags 2> /dev/null)
-    if [[ $? -ne 0 ]]; then
+    if ! CTAGS=$(command -v ctags 2> /dev/null); then
         echo -e "\033[31mctags not found. Please install ctags.\033[0m"
         exit 1
     fi
@@ -48,16 +46,9 @@ generate_ctags() {
 
 
 
-CMAKE=$(command -v cmake 2> /dev/null)
-if [[ $? -ne 0 ]]; then
-    echo -e "\033[31mCMake not found. Please install CMake.\033[0m"
-    exit 1
-fi
-
 OPTIONS=":hbrcj:"
 LONGOPTS="help,build,rebuild,clean,jobs:,now"
-OPTS=$(getopt --name "$0" -o $OPTIONS -l $LONGOPTS -- "$@")
-if [[ $? -ne 0 ]]; then
+if ! OPTS=$(getopt --name "$0" -o $OPTIONS -l $LONGOPTS -- "$@"); then
     display_help
     exit 1
 fi
@@ -101,7 +92,7 @@ while true; do
             ;;
         -j|--jobs)
             if [[ -z "$2" ]]; then
-                echo $2
+                echo "$2"
                 JOBS=$(nproc --all)
                 shift 1
             fi

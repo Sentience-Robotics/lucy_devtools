@@ -39,17 +39,14 @@ dc_attach() {
 
 
 
-DOCKER=$(command -v docker 2> /dev/null)
-if [[ $? -ne 0 ]]; then
+if ! DOCKER=$(command -v docker 2> /dev/null); then
     echo -e "\033[31mDocker is not installed. Please install Docker to use this script.\033[0m"
     exit 1
 fi
 
 DOCKER_COMPOSE="$DOCKER compose"
-$DOCKER_COMPOSE version &> /dev/null
-if [[ $? -ne 0 ]]; then
-    DOCKER_COMPOSE=$(command -v docker-compose 2> /dev/null)
-    if [[ $? -ne 0 ]]; then
+if ! $DOCKER_COMPOSE version &> /dev/null; then
+    if ! DOCKER_COMPOSE=$(command -v docker-compose 2> /dev/null); then
         echo -e "\033[31mDocker Compose is not installed. Please install Docker Compose to use this script.\033[0m"
         exit 1
     fi
@@ -58,8 +55,7 @@ DOCKER_COMPOSE="$DOCKER_COMPOSE -f $LUCY_DOCKER/lucy_ros2_ws/$ROS_DISTRO/docker-
 
 OPTIONS=":h"
 LONGOPTS="help"
-OPTS=$(getopt --name "$0" -o $OPTIONS -l $LONGOPTS -- "$@")
-if [ $? -ne 0 ]; then
+if ! OPTS=$(getopt --name "$0" -o $OPTIONS -l $LONGOPTS -- "$@"); then
     display_help
     exit 1
 fi
@@ -108,10 +104,6 @@ for arg in "$@"; do
             ;;
         stop)
             dc_stop
-            break
-            ;;
-        down)
-            dc_down
             break
             ;;
         attach)

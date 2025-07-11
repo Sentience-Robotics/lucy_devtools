@@ -9,39 +9,38 @@ if [[ -d "lucy" ]]; then
     exit 1
 fi
 mkdir -p lucy/src
-cd lucy
+cd lucy || exit 1
 echo -e "\033[32mok.\033[0m"
 
 # Cloning repositories
 
 echo -ne "Select a cloning method for lucy repo (https/ssh): "
-read method
-method=$(echo $method | tr '[:upper:]' '[:lower:]')
+read -r method
+method=$(echo "$method" | tr '[:upper:]' '[:lower:]')
 
 # Cloning lucy repo
 
 GIT=$(command -v git 2> /dev/null)
-if [[ $? -ne 0 ]]; then
+if [[ -z "$GIT" ]]; then
     echo -e "\033[31mgit not found.\033[0m"
     exit 1
 fi
 
 CURL=$(command -v curl 2> /dev/null)
-if [[ $? -ne 0 ]]; then
+if [[ -z "$CURL" ]]; then
     echo -e "\033[31mcurl not found.\033[0m"
     exit 1
 fi
 
 VCS=$(command -v vcs 2> /dev/null)
-if [[ $? -ne 0 ]]; then
+if [[ -z "$VCS" ]]; then
     echo -e "\033[31mvcs not found.\033[0m"
     exit 1
 fi
 
 clone_lucy_repo() {
     echo -ne "Cloning $1Sentience-Robotics/$2.git. "
-    $GIT clone "$1Sentience-Robotics/$2.git" > /dev/null 2> /tmp/lucy_init.log
-    if [[ $? -ne 0 ]]; then
+    if ! $GIT clone "$1Sentience-Robotics/$2.git" > /dev/null 2> /tmp/lucy_init.log; then
         echo -ne "\033[31mko\033[0m"
         cat /tmp/lucy_init.log
         exit 1
@@ -53,8 +52,7 @@ case "$method" in
     1|https|http)
         clone_lucy_repo "https://github.com/" "lucy_devtools"
         echo -ne "Cloning lucy ros packages "
-        $CURL -fsSL "https://raw.githubusercontent.com/Sentience-Robotics/lucy_devtools/refs/heads/master/lucy_utils/lucy.https.repos" | $VCS import src > /dev/null 2> /tmp/lucy_init.log
-        if [[ $? -ne 0 ]]; then
+        if ! $CURL -fsSL "https://raw.githubusercontent.com/Sentience-Robotics/lucy_devtools/refs/heads/master/lucy_utils/lucy.https.repos" | $VCS import src > /dev/null 2> /tmp/lucy_init.log; then
             echo -ne "\033[31mko\033[0m"
             cat /tmp/lucy_init.log
             exit 1
@@ -64,8 +62,7 @@ case "$method" in
     2|ssh)
         clone_lucy_repo "git@github.com:" "lucy_devtools"
         echo -ne "Cloning lucy ros packages "
-        $CURL -fsSL "https://raw.githubusercontent.com/Sentience-Robotics/lucy_devtools/refs/heads/master/lucy_utils/lucy.ssh.repos" | $VCS import src > /dev/null 2> /tmp/lucy_init.log
-        if [[ $? -ne 0 ]]; then
+        if ! $CURL -fsSL "https://raw.githubusercontent.com/Sentience-Robotics/lucy_devtools/refs/heads/master/lucy_utils/lucy.ssh.repos" | $VCS import src > /dev/null 2> /tmp/lucy_init.log; then
             echo -ne "\033[31mko\033[0m"
             cat /tmp/lucy_init.log
             exit 1
@@ -98,14 +95,12 @@ EOF
 source "$(pwd)/.envrc"
 
 echo -ne "Setting up the environment "
-DIRENV=$(command -v direnv 2> /dev/null)
-if [[  $? -ne 0 ]]; then
+if ! DIRENV=$(command -v direnv 2> /dev/null); then
     echo -e "\033[31mko.\033[0m"
     echo -e "direnv not found."
     exit 1
 fi
-$DIRENV allow .
-if [[ $? -ne 0 ]]; then
+if ! $DIRENV allow .; then
     echo -e "\033[31mko.\033[0m"
     exit 1
 fi
@@ -121,18 +116,18 @@ echo -e "\033[32mok.\033[0m"
 
 ROS_DISTRIBUTIONS=("humble" "jazzy")
 
-echo -ne "Choose a ros distribution (${ROS_DISTRIBUTIONS[@]}): "
-read USER_ROS_DISTRIBUTION
-USER_ROS_DISTRIBUTION=$(echo $USER_ROS_DISTRIBUTION | tr '[:upper:]' '[:lower:]')
+echo -ne "Choose a ros distribution (${ROS_DISTRIBUTIONS[*]}): "
+read -r USER_ROS_DISTRIBUTION
+USER_ROS_DISTRIBUTION=$(echo "$USER_ROS_DISTRIBUTION" | tr '[:upper:]' '[:lower:]')
 if [[ -z "$USER_ROS_DISTRIBUTION" ]]; then
     echo -e "\033[31mYou must specify a ros distribution\033[0m"
     exit 1
 fi
 
-if [[ ! "${ROS_DISTRIBUTIONS[@]}" =~ $USER_ROS_DISTRIBUTION ]]; then
+if [[ ! "${ROS_DISTRIBUTIONS[*]}" =~ $USER_ROS_DISTRIBUTION ]]; then
     echo -e "\033[31mThis ROS distribution doesn't exist or is not suported"
-    echo -e "Supported distribution: (${ROS_DISTRIBUTIONS[@]})\033[0m"
+    echo -e "Supported distribution: (${ROS_DISTRIBUTIONS[*]})\033[0m"
     exit 1
 fi
 
-lucy_devtools/lucy_utils/ChangeEnv $ROS_DISTRIBUTIONS
+lucy_devtools/lucy_utils/ChangeEnv "$USER_ROS_DISTRIBUTION"
