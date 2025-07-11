@@ -23,7 +23,8 @@ RUN apt update -q && \
     apt install -y --no-install-recommends \
         software-properties-common apt-utils \
         python3-pip \
-        make ninja-build clang gcc-arm-none-eabi \
+        libnewlib-arm-none-eabi libnewlib-dev libstdc++-arm-none-eabi-dev libstdc++-arm-none-eabi-newlib \
+        make ninja-build clang \
         direnv git vim screen curl lsb-release gnupg sudo clangd \
         libboost-all-dev \
         xorg dbus-x11 tigervnc-common tigervnc-xorg-extension tigervnc-standalone-server tigervnc-tools && \
@@ -38,7 +39,7 @@ RUN apt update -q && \
     apt clean -y
 
 # Setup user
-RUN useradd -m -u $UID -g $GID -s /bin/bash -G sudo $USERNAME && \
+RUN useradd -m -u $UID -s /bin/bash -G sudo $USERNAME && \
     echo "$USERNAME ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers && \
     mkdir -p /home/$USERNAME/lucy_ros2_ws && \
     chown -R $USERNAME:$USERNAME /home/$USERNAME
