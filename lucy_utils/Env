@@ -18,7 +18,7 @@ display_help() {
 }
 
 dc_up() {
-    $DOCKER_COMPOSE up --build -d
+    ENVUID=$(id -u) ENVGID=$(id -g) $DOCKER_COMPOSE up --build -d
 }
 
 dc_down() {

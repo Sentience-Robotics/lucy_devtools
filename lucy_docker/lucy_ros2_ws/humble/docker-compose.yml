@@ -1,7 +1,12 @@
 services:
   lucy_ros2_ws:
-    build: .
+    build:
+      context: .
+      args:
+        ENVUID: ${ENVUID}
+        ENVGID: ${ENVGID}
     container_name: "lucy_ros2_ws_humble"
+    privileged: true
     image: lucy_ros2_ws:humble
     restart: unless-stopped
     command: tail -f /dev/null
@@ -9,3 +14,4 @@ services:
       - 5900:5900
     volumes:
       - "${LUCY}:/home/rosdev/lucy_ros2_ws"
+      - "/dev:/dev"

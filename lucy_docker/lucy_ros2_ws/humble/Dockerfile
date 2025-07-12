@@ -7,8 +7,8 @@ LABEL org.opencontainers.image.vendor="Sentience Robotics"
 LABEL org.opencontainers.image.authors="Sentience Robotics"
 
 #Setup ARG
-ARG UID=1000
-ARG GID=1000
+ARG ENVUID=1000
+ARG ENVGID=$ENVUID
 ARG DEBIAN_FRONTEND=noninteractive
 ARG ROS_DISTRO=humble
 ARG USERNAME=rosdev
@@ -16,6 +16,7 @@ ARG USERNAME=rosdev
 # Set the locale
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
+ENV PICO_SDK_PATH="/home/$USERNAME/pico-sdk"
 
 # Install mandatory packages packages
 RUN apt update -q && \
@@ -34,12 +35,17 @@ RUN apt update -q && \
     apt update -q && \
     apt install -y --no-install-recommends \
         ros-$ROS_DISTRO-desktop \
-        ros-$ROS_DISTRO-ros-gz \
+        ros-$ROS_DISTRO-ros-gz ros-humble-micro-ros-msgs \
         ros-dev-tools && \
     apt clean -y
 
+# Setup pico-sdk
+RUN git clone https://github.com/raspberrypi/pico-sdk.git /home/$USERNAME/pico-sdk && \
+    cd /home/$USERNAME/pico-sdk && \
+    git submodule update --init --recursive
+
 # Setup user
-RUN useradd -m -u $UID -s /bin/bash -G sudo $USERNAME && \
+RUN useradd -m -u $ENVUID -s /bin/bash -G sudo $USERNAME && \
     echo "$USERNAME ALL=(ALL:ALL) NOPASSWD:ALL" >> /etc/sudoers && \
     mkdir -p /home/$USERNAME/lucy_ros2_ws && \
     chown -R $USERNAME:$USERNAME /home/$USERNAME
@@ -51,4 +57,3 @@ RUN bash -c "echo -e '$USERNAME\n$USERNAME\n' | vncpasswd"
 RUN echo 'source /opt/ros/'$ROS_DISTRO'/setup.bash' >> /home/$USERNAME/.bashrc && \
     echo 'eval "$(direnv hook bash)"' >> /home/$USERNAME/.bashrc && \
     echo 'umask 0000' >> /home/$USERNAME/.bashrc
-
